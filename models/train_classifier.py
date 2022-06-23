@@ -17,7 +17,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///DisasterResponse.db')
+    engine = create_engine('sqlite:///../data/{}'.format(database_filepath))
     df = pd.read_sql_table('DisasterResponse', engine)
     X = df['message'].values
 
