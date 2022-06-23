@@ -5,6 +5,17 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """" Function to load two datasets, merge and return
+    a single dataset.
+
+    Args:
+        messages_filepath (string): filepath to messages dataset
+        categories_filepath (string): filepath to categories dataset
+
+    Returns:
+        dataframe: merge of two datasets
+    """
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
 
@@ -15,6 +26,16 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """ Function to clean dataset. Splits categories into
+    separate columns, clearly names columns, converts category
+    values to binary numeric integers, drops duplicate rows,
+    and removes rows where all target variables are NaN.
+
+    Args:
+        dataframe: dirty dataset
+    Returns: cleaned dataframe
+    """
+
     categories = df['categories'].str.split(';', expand=True)
     row = categories.iloc[0]
 
@@ -48,8 +69,17 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """ Function to save the cleaned and transformed dataset to
+    a SQLite database.
+
+    Args:
+        df (dataframe): dataframe to write to sql database
+        database_filename (string): filepath to the database
+    Returns:
+        None
+    """
+
     # create sql connection object to database
-    #engine = create_engine(database_filename)
     engine = create_engine('sqlite:///{}'.format(database_filename))
     df.to_sql('DisasterResponse', engine, if_exists='replace', index=False)
 
