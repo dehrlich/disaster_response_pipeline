@@ -66,7 +66,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
     for i, col_name in enumerate(category_names):
         print('Individual Category Metrics: {}\n'.format(col_name))
-        print(classification_report(y_test[:][i], y_pred[:][i]))
+        print(classification_report(Y_test[:][i], Y_pred[:][i]))
 
 
 def save_model(model, model_filepath):
