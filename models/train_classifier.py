@@ -1,24 +1,76 @@
 import sys
+import numpy as np
+import pandas as pd
+from sqlalchemy import create_engine
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+from sklearn.externals import joblib
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
 def load_data(database_filepath):
-    pass
+    engine = create_engine('sqlite:///DisasterResponse.db')
+    df = pd.read_sql_table('DisasterResponse', engine)
+    X = df['message'].values
+
+    # just grab the column names of the multi-class target
+    category_names = list(df.columns)[4:]
+    Y = df[category_names].values
+
+    return X,Y, category_names
 
 
 def tokenize(text):
-    pass
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+    
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+        
+    return clean_tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(estimator=RandomForestClassifier()))
+    ])
+
+    parameters = {
+        'vect__ngram_range': ((1, 1), (1, 2)),
+        'clf__estimator__n_estimators': [50, 100],
+        'clf__estimator__min_samples_split': [2, 3]
+    }
+
+    model = GridSearchCV(pipeline, param_grid=parameters)
+
+    return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    print('---------- Model Evaluation ----------\n')
+    Y_pred = model.predict(X_test)
+    accuracy = (Y_pred == Y_test).mean()
+    print("Model Accuracy = {}\n".format(accuracy))
+
+    for i, col_name in enumerate(category_names):
+        print('Individual Category Metrics: {}\n'.format(col_name))
+        print(classification_report(y_test[:][i], y_pred[:][i]))
 
 
 def save_model(model, model_filepath):
-    pass
+    joblib.dump(model, model_filepath)
 
 
 def main():
