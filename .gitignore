@@ -1,2 +1,2 @@
-/models/disaster_response_model.joblib
-/data/DisasterResponse.db
+models/disaster_response_model.joblib
+data/DisasterResponse.db
