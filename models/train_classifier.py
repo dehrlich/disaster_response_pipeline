@@ -2,11 +2,13 @@ import sys
 import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
+import nltk
+nltk.download(['punkt', 'wordnet', 'omw-1.4'])
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-from sklearn.externals import joblib
-from sklearn.metrics import confusion_matrix, classification_report
+from joblib import dump, load
+from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
@@ -133,8 +135,8 @@ def save_model(model, model_filepath):
     Returns:
         None
     """
-    
-    joblib.dump(model, model_filepath)
+
+    dump(model, model_filepath)
 
 
 def main():

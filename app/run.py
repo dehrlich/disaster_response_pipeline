@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+from joblib import dump, load
 from sqlalchemy import create_engine
 
 
@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql_table('DisasterResponse', engine)
+engine = create_engine("sqlite:///../data/DisasterResponse.db")
+df = pd.read_sql_table("DisasterResponse", engine)
 
 # load model
-model = joblib.load("../models/disaster_response_model.pkl")
+model = load("../models/disaster_response_model.joblib")
 
 
 # index webpage displays cool visuals and receives user input text for model
