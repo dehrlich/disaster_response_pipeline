@@ -17,6 +17,20 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
 def load_data(database_filepath):
+    """" Function to load a dataset from a SQLite datavase table.
+    Loads dataset into pandas dataframe, then loads the explanatory
+    variable into X and target categories into Y, as well as a list
+    of the target category names into the variable 'category_names.'
+
+    Args:
+        database_filepath (string): filepath to database
+
+    Returns:
+        array: X, array of explanatory variable
+        array: Y, multi-class array of target classes
+        list: category_names, list of target category names
+    """
+
     engine = create_engine('sqlite:///../data/{}'.format(database_filepath))
     df = pd.read_sql_table('DisasterResponse', engine)
     X = df['message'].values
@@ -29,6 +43,19 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """ Function to tokenize a text input. Takes a text input
+    and split into the simple text, removing punctuation,
+    normalized each token by putting it in lower case, striping
+    any additional white space, and lemmatizing each resulting
+    token. 
+
+    Args:
+        text (string): text input
+    
+    Returns:
+        list: list of cleaned tokens
+    """
+
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
@@ -41,6 +68,18 @@ def tokenize(text):
 
 
 def build_model():
+    """ Function to build a machine learning model pipeline.
+    Uses the sklearn Pipeline class to chain the transformation
+    and model training steps. Uses gridsearch to find optimal
+    model parameters over provided ranges.
+
+    Args: 
+        None
+
+    Returns:
+        sklearn Pipeline object
+    """
+
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -48,9 +87,8 @@ def build_model():
     ])
 
     parameters = {
-        'vect__ngram_range': ((1, 1), (1, 2)),
-        'clf__estimator__n_estimators': [50, 100],
-        'clf__estimator__min_samples_split': [2, 3]
+        'clf__estimator__n_estimators': [20],
+        'clf__estimator__min_samples_split': [3]
     }
 
     model = GridSearchCV(pipeline, param_grid=parameters)
@@ -59,6 +97,21 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """ Function to evaluate the performance of the model. Uses the trained
+    model to predict target categories based on X_test matrix. Prints overall
+    model accuracy, followed by precision, recall, f1-score and support for
+    each target category.
+
+    Args:
+        model: sklearn trained model object
+        array: X_test, array of explanatory variable
+        array: Y_test, multi-class array of target classes
+        list: category_names, list of target category names
+
+    Returns:
+        None
+    """
+
     print('---------- Model Evaluation ----------\n')
     Y_pred = model.predict(X_test)
     accuracy = (Y_pred == Y_test).mean()
@@ -70,6 +123,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """ Function to export model to a pickle file for future use
+    by app to predict message categories.
+
+    Args:
+        model: sklearn trained model object
+        model_filepath (string): filepath in which to store picked model
+
+    Returns:
+        None
+    """
+    
     joblib.dump(model, model_filepath)
 
 
