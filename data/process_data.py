@@ -25,6 +25,21 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 
+def condition(x):
+    """ Function to change extra message encoding to 1
+
+    Args:
+        integer: encoding for 'related' message category
+    Returns:
+        integer: 1 if encoding is 2, else original encoding (0,1)
+    """
+
+    if x == 2:
+        return 1
+    else:
+        return x
+
+
 def clean_data(df):
     """ Function to clean dataset. Splits categories into
     separate columns, clearly names columns, converts category
@@ -52,6 +67,8 @@ def clean_data(df):
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
 
+    categories['related'] = categories['related'].apply(condition)
+
     # drop the original categories column from `df`
     df.drop('categories', axis=1, inplace=True)
 
@@ -65,7 +82,6 @@ def clean_data(df):
     df.dropna(axis=0, thresh=36, inplace=True)
 
     return df
-
 
 
 def save_data(df, database_filename):
